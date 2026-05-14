@@ -1,0 +1,1135 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Hero</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;1,9..144,300&family=IBM+Plex+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+
+<style>
+  :root {
+    --overlay: rgba(0, 0, 0, 0.24);
+    --text: #ffffff;
+    --text-dim: rgba(255, 255, 255, 0.7);
+    --hairline: rgba(255, 255, 255, 0.25);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html, body {
+    background: #000;
+    color: var(--text);
+    font-family: 'IBM Plex Mono', monospace;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    overflow-x: hidden;
+  }
+
+  .hero {
+    position: relative;
+    width: 100%;
+    height: 100vh;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* video bg */
+  .hero__video {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    z-index: 0;
+  }
+
+  /* overlay #000 / 24% */
+  .hero__overlay {
+    position: absolute;
+    inset: 0;
+    background: var(--overlay);
+    z-index: 1;
+    pointer-events: none;
+  }
+
+  /* hairline frame – subtle editorial touch */
+  .hero__frame {
+    position: absolute;
+    inset: 24px;
+    border: 1px solid var(--hairline);
+    z-index: 2;
+    pointer-events: none;
+  }
+
+  /* top bar */
+  .hero__top {
+    position: absolute;
+    top: 40px;
+    left: 40px;
+    right: 40px;
+    z-index: 3;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 11px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    opacity: 0;
+    animation: fadeIn 1.2s ease 0.2s forwards;
+  }
+
+  .hero__status {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .hero__dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #fff;
+    box-shadow: 0 0 12px rgba(255,255,255,0.8);
+    animation: pulse 2s ease-in-out infinite;
+  }
+
+  /* content */
+  .hero__content {
+    position: relative;
+    z-index: 3;
+    text-align: center;
+    padding: 0 24px;
+    max-width: 1100px;
+  }
+
+  .hero__eyebrow {
+    font-size: 11px;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    margin-bottom: 32px;
+    opacity: 0;
+    animation: fadeUp 1s ease 0.4s forwards;
+  }
+
+  .hero__eyebrow::before,
+  .hero__eyebrow::after {
+    content: "";
+    display: inline-block;
+    width: 32px;
+    height: 1px;
+    background: var(--hairline);
+    vertical-align: middle;
+    margin: 0 16px;
+  }
+
+  .hero__title {
+    font-family: 'Fraunces', serif;
+    font-weight: 300;
+    font-size: clamp(48px, 8.5vw, 132px);
+    line-height: 0.95;
+    letter-spacing: -0.03em;
+    margin-bottom: 28px;
+    opacity: 0;
+    animation: fadeUp 1.2s cubic-bezier(0.16, 1, 0.3, 1) 0.6s forwards;
+    /* liquid hover */
+    filter: url(#liquid);
+    cursor: default;
+    will-change: filter;
+  }
+
+  .hero__title em {
+    font-style: italic;
+    font-weight: 300;
+  }
+
+  .hero__subtitle {
+    font-family: 'IBM Plex Mono', monospace;
+    font-weight: 300;
+    font-size: clamp(14px, 1.1vw, 17px);
+    line-height: 1.6;
+    color: var(--text-dim);
+    max-width: 520px;
+    margin: 0 auto 48px;
+    opacity: 0;
+    animation: fadeUp 1.2s cubic-bezier(0.16, 1, 0.3, 1) 0.85s forwards;
+  }
+
+  /* button */
+  .hero__cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 14px;
+    padding: 18px 32px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    font-weight: 400;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--text);
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    border-radius: 0;
+    cursor: pointer;
+    text-decoration: none;
+    position: relative;
+    overflow: hidden;
+    transition: color 0.4s ease, border-color 0.4s ease;
+    opacity: 0;
+    animation: fadeUp 1.2s cubic-bezier(0.16, 1, 0.3, 1) 1.05s forwards;
+  }
+
+  .hero__cta::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: #fff;
+    transform: translateY(101%);
+    transition: transform 0.5s cubic-bezier(0.7, 0, 0.2, 1);
+    z-index: -1;
+  }
+
+  .hero__cta:hover {
+    color: #000;
+    border-color: #fff;
+  }
+
+  .hero__cta:hover::before {
+    transform: translateY(0);
+  }
+
+  .hero__cta-arrow {
+    transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .hero__cta:hover .hero__cta-arrow {
+    transform: translateX(4px);
+  }
+
+  /* bottom bar */
+  .hero__bottom {
+    position: absolute;
+    bottom: 40px;
+    left: 40px;
+    right: 40px;
+    z-index: 3;
+    display: flex;
+    justify-content: space-between;
+    align-items: end;
+    font-size: 11px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    opacity: 0;
+    animation: fadeIn 1.2s ease 1.3s forwards;
+  }
+
+  .hero__scroll {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    writing-mode: vertical-rl;
+    transform: rotate(180deg);
+    position: absolute;
+    bottom: 40px;
+    left: 50%;
+    margin-left: -6px;
+  }
+
+  .hero__scroll-line {
+    width: 1px;
+    height: 48px;
+    background: linear-gradient(to bottom, transparent, var(--text));
+    transform: rotate(180deg);
+    animation: scrollLine 2.4s ease-in-out infinite;
+  }
+
+  /* animations */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes fadeIn {
+    to { opacity: 1; }
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50%      { opacity: 0.5; transform: scale(0.85); }
+  }
+  @keyframes scrollLine {
+    0%   { transform: rotate(180deg) scaleY(0); transform-origin: top; }
+    50%  { transform: rotate(180deg) scaleY(1); transform-origin: top; }
+    51%  { transform: rotate(180deg) scaleY(1); transform-origin: bottom; }
+    100% { transform: rotate(180deg) scaleY(0); transform-origin: bottom; }
+  }
+
+  /* ================== TRIPS SECTION ================== */
+  .trips {
+    position: relative;
+    width: 100%;
+    height: 100vh;
+    min-height: 600px;
+    background: #e8e6e1; /* slight off-white — peeks through gap as hairline */
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1px;
+    overflow: hidden;
+  }
+
+  .tile {
+    position: relative;
+    overflow: hidden;
+    background: #0a0a0a;
+    color: #fff;
+    cursor: pointer;
+    isolation: isolate;
+  }
+
+  .tile__media {
+    position: absolute;
+    inset: 0;
+    background-size: cover;
+    background-position: center;
+    transform: scale(1.02);
+    transition: transform 1.4s cubic-bezier(0.16, 1, 0.3, 1);
+    z-index: 0;
+  }
+
+  .tile:hover .tile__media {
+    transform: scale(1.1);
+  }
+
+  .tile__overlay {
+    position: absolute;
+    inset: 0;
+    background:
+      linear-gradient(180deg,
+        rgba(0,0,0,0.45) 0%,
+        rgba(0,0,0,0.15) 35%,
+        rgba(0,0,0,0.25) 60%,
+        rgba(0,0,0,0.72) 100%);
+    transition: opacity 0.6s ease;
+    z-index: 1;
+  }
+
+  .tile:hover .tile__overlay {
+    opacity: 0.78;
+  }
+
+  .tile__inner {
+    position: relative;
+    z-index: 2;
+    height: 100%;
+    padding: 36px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+
+  .tile__top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+  }
+
+  .tile__num {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.85);
+  }
+
+  .tile__icon {
+    width: 46px;
+    height: 46px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid rgba(255,255,255,0.35);
+    border-radius: 50%;
+    color: #fff;
+    transition: border-color 0.5s ease, background-color 0.5s ease, transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .tile:hover .tile__icon {
+    border-color: rgba(255,255,255,0.95);
+    background-color: rgba(255,255,255,0.1);
+    transform: rotate(-8deg);
+  }
+
+  .tile__bottom {
+    display: flex;
+    flex-direction: column;
+    transform: translateY(0);
+    transition: transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .tile:hover .tile__bottom {
+    transform: translateY(-6px);
+  }
+
+  .tile__label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.8);
+    margin-bottom: 18px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .tile__label::before {
+    content: "";
+    width: 24px;
+    height: 1px;
+    background: rgba(255,255,255,0.6);
+  }
+
+  .tile__title {
+    font-family: 'Fraunces', serif;
+    font-weight: 300;
+    font-size: clamp(40px, 4.6vw, 68px);
+    line-height: 0.98;
+    letter-spacing: -0.025em;
+    margin-bottom: 20px;
+  }
+
+  .tile__desc {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 13px;
+    line-height: 1.65;
+    font-weight: 300;
+    color: rgba(255,255,255,0.85);
+    max-width: 320px;
+    margin-bottom: 32px;
+  }
+
+  .tile__meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 22px;
+    border-top: 1px solid rgba(255,255,255,0.22);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+
+  .tile__arrow {
+    display: inline-block;
+    transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .tile:hover .tile__arrow {
+    transform: translateX(8px);
+  }
+
+  /* section number badge top-left */
+  .trips__badge {
+    position: absolute;
+    top: 24px;
+    left: 24px;
+    z-index: 5;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: #fff;
+    mix-blend-mode: difference;
+    pointer-events: none;
+  }
+  /* ================ END TRIPS SECTION ================ */
+
+  /* ================== TESTIMONIALS (stagger) ================== */
+  .testimonials {
+    position: relative;
+    width: 100%;
+    min-height: 100vh;
+    background: #0a0a0a;
+    color: #fff;
+    padding: 120px 24px 100px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .testimonials::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(ellipse at 25% 15%, rgba(255,255,255,0.05), transparent 55%),
+      radial-gradient(ellipse at 80% 85%, rgba(255,255,255,0.035), transparent 60%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .testimonials__badge {
+    position: absolute;
+    top: 32px;
+    left: 32px;
+    z-index: 5;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.45);
+  }
+
+  .testimonials__inner {
+    position: relative;
+    z-index: 2;
+    width: 100%;
+    max-width: 1200px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 56px;
+  }
+
+  .testimonials__head {
+    text-align: center;
+    max-width: 640px;
+  }
+
+  .testimonials__eyebrow {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.5);
+    margin-bottom: 24px;
+    display: inline-flex;
+    align-items: center;
+    gap: 14px;
+  }
+  .testimonials__eyebrow::before,
+  .testimonials__eyebrow::after {
+    content: "";
+    width: 28px;
+    height: 1px;
+    background: rgba(255,255,255,0.25);
+  }
+
+  .testimonials__title {
+    font-family: 'Fraunces', serif;
+    font-weight: 300;
+    font-size: clamp(36px, 5.2vw, 64px);
+    line-height: 1;
+    letter-spacing: -0.025em;
+  }
+  .testimonials__title em {
+    font-style: italic;
+    font-weight: 300;
+  }
+
+  /* stagger carousel */
+  .stagger {
+    position: relative;
+    width: 100%;
+    height: 600px;
+    background: rgba(255,255,255,0.025);
+    overflow: hidden;
+  }
+
+  .stagger__card {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    cursor: pointer;
+    width: 365px;
+    height: 365px;
+    background: #131313;
+    color: rgba(255,255,255,0.95);
+    border: 2px solid rgba(255,255,255,0.2);
+    padding: 32px;
+    box-sizing: border-box;
+    transition:
+      transform 0.5s ease-in-out,
+      background-color 0.5s ease-in-out,
+      color 0.5s ease-in-out,
+      border-color 0.5s ease-in-out,
+      box-shadow 0.5s ease-in-out;
+    clip-path: polygon(50px 0%, calc(100% - 50px) 0%, 100% 50px, 100% 100%, calc(100% - 50px) 100%, 50px 100%, 0 100%, 0 0);
+  }
+
+  .stagger__card:not(.stagger__card--active):hover {
+    border-color: rgba(255,255,255,0.55);
+  }
+
+  .stagger__card--active {
+    z-index: 10;
+    background: #f1efe9;
+    color: #0a0a0a;
+    border-color: #f1efe9;
+    box-shadow: 0 8px 0 4px rgba(255,255,255,0.12);
+    cursor: default;
+  }
+
+  .stagger__diag {
+    position: absolute;
+    right: -2px;
+    top: 48px;
+    width: 70.71px; /* sqrt(5000) */
+    height: 2px;
+    background: rgba(255,255,255,0.2);
+    transform-origin: top right;
+    transform: rotate(45deg);
+    display: block;
+    transition: background 0.5s ease-in-out;
+  }
+  .stagger__card--active .stagger__diag {
+    background: #0a0a0a;
+  }
+
+  .stagger__img {
+    width: 48px;
+    height: 56px;
+    margin-bottom: 16px;
+    display: block;
+    object-fit: cover;
+    object-position: top;
+    background: rgba(255,255,255,0.05);
+    box-shadow: 3px 3px 0 #0a0a0a;
+    transition: box-shadow 0.5s ease-in-out;
+  }
+  .stagger__card--active .stagger__img {
+    box-shadow: 3px 3px 0 #f1efe9, 3px 3px 0 1px rgba(0,0,0,0.18);
+  }
+
+  .stagger__quote {
+    font-family: 'Fraunces', serif;
+    font-weight: 300;
+    font-size: clamp(15px, 1.4vw, 20px);
+    line-height: 1.28;
+    letter-spacing: -0.005em;
+    margin: 0;
+  }
+
+  .stagger__by {
+    position: absolute;
+    bottom: 32px;
+    left: 32px;
+    right: 32px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-style: italic;
+    font-size: 12px;
+    letter-spacing: 0.01em;
+    color: rgba(255,255,255,0.55);
+    margin: 0;
+    transition: color 0.5s ease-in-out;
+  }
+  .stagger__card--active .stagger__by {
+    color: rgba(0,0,0,0.7);
+  }
+
+  .stagger__nav {
+    position: absolute;
+    bottom: 16px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 8px;
+    z-index: 20;
+  }
+
+  .stagger__btn {
+    width: 56px;
+    height: 56px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: #0a0a0a;
+    border: 2px solid rgba(255,255,255,0.2);
+    color: rgba(255,255,255,0.92);
+    cursor: pointer;
+    padding: 0;
+    transition: background 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+    font-family: 'IBM Plex Mono', monospace;
+  }
+  .stagger__btn:hover {
+    background: #f1efe9;
+    color: #0a0a0a;
+    border-color: #f1efe9;
+  }
+  .stagger__btn:focus-visible {
+    outline: 2px solid #f1efe9;
+    outline-offset: 2px;
+  }
+  .stagger__btn svg {
+    width: 22px;
+    height: 22px;
+  }
+  /* ================ END TESTIMONIALS ================ */
+
+  @media (max-width: 768px) {
+    .hero__frame { inset: 16px; }
+    .hero__top, .hero__bottom { left: 24px; right: 24px; }
+    .hero__top { top: 28px; }
+    .hero__bottom { bottom: 28px; }
+    .hero__eyebrow::before,
+    .hero__eyebrow::after { width: 20px; margin: 0 10px; }
+    .hero__scroll { display: none; }
+    .hero__bottom { font-size: 10px; }
+
+    /* trips */
+    .trips {
+      grid-template-columns: 1fr;
+      grid-template-rows: repeat(3, 1fr);
+      height: auto;
+      min-height: 100vh;
+    }
+    .tile__inner { padding: 28px; }
+    .tile__title { font-size: clamp(36px, 9vw, 56px); }
+    .tile__desc { max-width: 100%; margin-bottom: 24px; }
+    .tile__icon { width: 40px; height: 40px; }
+    .trips__badge { top: 16px; left: 20px; }
+
+    /* testimonials */
+    .testimonials { padding: 80px 16px 64px; }
+    .testimonials__badge { top: 20px; left: 20px; }
+    .testimonials__inner { gap: 40px; }
+    .stagger { height: 560px; }
+    .stagger__card { padding: 24px; }
+    .stagger__quote { font-size: 14px; }
+    .stagger__by { bottom: 24px; left: 24px; right: 24px; font-size: 11px; }
+    .stagger__btn { width: 48px; height: 48px; }
+    .stagger__btn svg { width: 18px; height: 18px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- liquid SVG filter (hidden, used by .hero__title) -->
+<svg class="liquid-filter" aria-hidden="true" focusable="false"
+     style="position:absolute;width:0;height:0;overflow:hidden;pointer-events:none;">
+  <defs>
+    <filter id="liquid" x="-20%" y="-20%" width="140%" height="140%">
+      <feTurbulence id="liquidTurb" type="fractalNoise"
+                    baseFrequency="0.012" numOctaves="2" seed="4" result="noise"/>
+      <feDisplacementMap id="liquidDisp" in="SourceGraphic" in2="noise"
+                         scale="0" xChannelSelector="R" yChannelSelector="G"/>
+    </filter>
+  </defs>
+</svg>
+
+<section class="hero">
+  <video class="hero__video" autoplay muted loop playsinline id="bgVideo"></video>
+
+  <div class="hero__overlay"></div>
+  <div class="hero__frame"></div>
+
+  <div class="hero__top">
+    <span>Poutník</span>
+    <div class="hero__status">
+      <span class="hero__dot"></span>
+      <span>Sezóna 2026 · Volná místa</span>
+    </div>
+  </div>
+
+  <div class="hero__content">
+    <div class="hero__eyebrow">Treky &middot; Retreaty &middot; Výpravy</div>
+
+    <h1 class="hero__title">
+      Cesty, které <em>léčí.</em>
+    </h1>
+
+    <p class="hero__subtitle">
+      Vícedenní výpravy českou a slovenskou divočinou.
+      Bez davu, bez signálu, bez kompromisů.
+    </p>
+
+    <a href="#vylety" class="hero__cta">
+      <span>Zjistit více</span>
+      <svg class="hero__cta-arrow" width="14" height="10" viewBox="0 0 14 10" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M1 5h12M9 1l4 4-4 4" stroke="currentColor" stroke-width="1.2" fill="none" stroke-linecap="square"/>
+      </svg>
+    </a>
+  </div>
+
+  <div class="hero__bottom">
+    <span>(01) — Hero</span>
+    <span>Scroll ↓</span>
+    <span>CZ + SK</span>
+  </div>
+</section>
+
+<!-- ================== TRIPS SECTION ================== -->
+<section class="trips" id="vylety">
+  <span class="trips__badge">(02) — Výpravy</span>
+
+  <!-- TILE 01 — HŘEBENY -->
+  <article class="tile">
+    <div class="tile__media" style="background-image:url('https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&amp;fit=crop&amp;w=1600&amp;q=85');"></div>
+    <div class="tile__overlay"></div>
+    <div class="tile__inner">
+      <div class="tile__top">
+        <span class="tile__num">01 / 03</span>
+        <span class="tile__icon" aria-hidden="true">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round">
+            <path d="M2 20 L8 9 L11 13 L15 6 L22 20 Z"/>
+            <path d="M14 7 L15 6 L16 7" />
+          </svg>
+        </span>
+      </div>
+      <div class="tile__bottom">
+        <span class="tile__label">Vícedenní trek</span>
+        <h3 class="tile__title">Hřebeny</h3>
+        <p class="tile__desc">
+          Čtyři dny po hřebenech Vysokých Tater.
+          Bivak pod hvězdami, žádný signál, ranní mlha v sedlech.
+        </p>
+        <div class="tile__meta">
+          <span>Od 12 900 Kč · 4 dny</span>
+          <span class="tile__arrow">→</span>
+        </div>
+      </div>
+    </div>
+  </article>
+
+  <!-- TILE 02 — HVOZDY -->
+  <article class="tile">
+    <div class="tile__media" style="background-image:url('https://images.unsplash.com/photo-1448375240586-882707db888b?auto=format&amp;fit=crop&amp;w=1600&amp;q=85');"></div>
+    <div class="tile__overlay"></div>
+    <div class="tile__inner">
+      <div class="tile__top">
+        <span class="tile__num">02 / 03</span>
+        <span class="tile__icon" aria-hidden="true">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round">
+            <path d="M12 3 L7 10 L9.5 10 L6 15 L9 15 L5 21 L19 21 L15 15 L18 15 L14.5 10 L17 10 Z"/>
+            <line x1="12" y1="21" x2="12" y2="23"/>
+          </svg>
+        </span>
+      </div>
+      <div class="tile__bottom">
+        <span class="tile__label">Lesní retreat</span>
+        <h3 class="tile__title">Hvozdy</h3>
+        <p class="tile__desc">
+          Tři dny ticha v šumavských pralesích.
+          Pomalá chůze, společné večeře, žádný program.
+        </p>
+        <div class="tile__meta">
+          <span>Od 8 900 Kč · 3 dny</span>
+          <span class="tile__arrow">→</span>
+        </div>
+      </div>
+    </div>
+  </article>
+
+  <!-- TILE 03 — PROUDY -->
+  <article class="tile">
+    <div class="tile__media" style="background-image:url('https://images.unsplash.com/photo-1437637035324-c80375267f97?auto=format&amp;fit=crop&amp;w=1600&amp;q=85');"></div>
+    <div class="tile__overlay"></div>
+    <div class="tile__inner">
+      <div class="tile__top">
+        <span class="tile__num">03 / 03</span>
+        <span class="tile__icon" aria-hidden="true">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round">
+            <path d="M2 8 Q6 5 10 8 T18 8 T22 8"/>
+            <path d="M2 13 Q6 10 10 13 T18 13 T22 13"/>
+            <path d="M2 18 Q6 15 10 18 T18 18 T22 18"/>
+          </svg>
+        </span>
+      </div>
+      <div class="tile__bottom">
+        <span class="tile__label">Splouvání řeky</span>
+        <h3 class="tile__title">Proudy</h3>
+        <p class="tile__desc">
+          Pět dní na kánoích horní Vltavou.
+          Spaní u vody, ohně na břehu, ranní káva v mlze.
+        </p>
+        <div class="tile__meta">
+          <span>Od 10 500 Kč · 5 dní</span>
+          <span class="tile__arrow">→</span>
+        </div>
+      </div>
+    </div>
+  </article>
+</section>
+<!-- ================ END TRIPS SECTION ================ -->
+
+<!-- ================== TESTIMONIALS ================== -->
+<section class="testimonials" id="reference">
+  <span class="testimonials__badge">(03) — Reference</span>
+
+  <div class="testimonials__inner">
+    <div class="testimonials__head">
+      <div class="testimonials__eyebrow">Slovo lidí, kteří šli s námi</div>
+      <h2 class="testimonials__title">
+        Něco, co se těžko <em>vypráví.</em>
+      </h2>
+    </div>
+
+    <div class="stagger" id="stagger">
+      <!-- karty se vykreslí přes JS -->
+      <div class="stagger__nav">
+        <button class="stagger__btn" id="staggerPrev" aria-label="Předchozí">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="square" stroke-linejoin="miter">
+            <polyline points="15 18 9 12 15 6"/>
+          </svg>
+        </button>
+        <button class="stagger__btn" id="staggerNext" aria-label="Další">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="square" stroke-linejoin="miter">
+            <polyline points="9 18 15 12 9 6"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </div>
+</section>
+<!-- ================ END TESTIMONIALS ================ -->
+
+<!-- hls.js for non-Safari browsers -->
+<script src="https://cdn.jsdelivr.net/npm/hls.js@1.5.13/dist/hls.min.js"></script>
+<script>
+  (function() {
+    const video = document.getElementById('bgVideo');
+    const src = 'https://v1.pinimg.com/videos/iht/hls/6b/ba/10/6bba10ab2107bae9cd54bc9741b15745.m3u8';
+
+    if (video.canPlayType('application/vnd.apple.mpegurl')) {
+      // Safari / iOS – native HLS
+      video.src = src;
+    } else if (window.Hls && Hls.isSupported()) {
+      // Chrome, Firefox, Edge
+      const hls = new Hls();
+      hls.loadSource(src);
+      hls.attachMedia(video);
+    } else {
+      console.warn('HLS není v tomto prohlížeči podporováno.');
+    }
+  })();
+
+  /* ---------- liquid title hover ---------- */
+  (function() {
+    const title = document.querySelector('.hero__title');
+    const disp  = document.getElementById('liquidDisp');
+    const turb  = document.getElementById('liquidTurb');
+    if (!title || !disp || !turb) return;
+
+    const MAX_SCALE = 32;     // jak moc se text "rozlije" (zkus 20–50)
+    const EASE      = 0.09;   // jak rychle dojede k cíli (0.05 = pomalu, 0.15 = rychle)
+    const FLOW      = 0.012;  // rychlost tečení turbulence
+
+    let target  = 0;
+    let current = 0;
+    let t       = 0;
+    let rafId   = null;
+    let active  = false;
+
+    function tick() {
+      // lerp scale k cíli
+      current += (target - current) * EASE;
+
+      // dokud je text rozlitý nebo k tomu míří, hýbej turbulencí
+      if (current > 0.05 || target > 0) {
+        t += FLOW;
+        const bf = (0.009 + Math.sin(t) * 0.005).toFixed(4);
+        turb.setAttribute('baseFrequency', bf);
+      }
+
+      disp.setAttribute('scale', current.toFixed(2));
+
+      // pokračuj dokud nejsme prakticky na cíli
+      if (Math.abs(current - target) > 0.02 || target > 0) {
+        rafId = requestAnimationFrame(tick);
+      } else {
+        current = target;
+        disp.setAttribute('scale', current);
+        rafId = null;
+        active = false;
+      }
+    }
+
+    function start() {
+      if (active) return;
+      active = true;
+      rafId = requestAnimationFrame(tick);
+    }
+
+    title.addEventListener('mouseenter', () => {
+      target = MAX_SCALE;
+      start();
+    });
+    title.addEventListener('mouseleave', () => {
+      target = 0;
+      start();
+    });
+
+    // touch zařízení – krátký "pulse" po tapnutí
+    title.addEventListener('touchstart', () => {
+      target = MAX_SCALE;
+      start();
+      setTimeout(() => { target = 0; start(); }, 600);
+    }, { passive: true });
+  })();
+
+
+  /* ---------- stagger testimonials (port of vaib215/stagger-testimonials) ---------- */
+  (function() {
+    const stack = document.getElementById('stagger');
+    if (!stack) return;
+    const prevBtn = document.getElementById('staggerPrev');
+    const nextBtn = document.getElementById('staggerNext');
+    const nav     = stack.querySelector('.stagger__nav');
+
+    /* Czech testimonials for Poutník expeditions.
+       img: pravatar deterministic by ?img=N — Jakube, klidně vyměň za skutečné foto klientů. */
+    const TESTIMONIALS = [
+      { tempId: 0,  q: "Po prvním ránu v Tatrách jsem se přistihl, jak se směju jen větru.",                                  by: "Tereza K., Praha — Hřebeny 2025",            img: "https://i.pravatar.cc/150?img=47" },
+      { tempId: 1,  q: "Šel jsem tam unavený. Vrátil jsem se pomalejší. A to bylo přesně to, co jsem potřeboval.",            by: "Petr M., Brno — Hvozdy 2024",                img: "https://i.pravatar.cc/150?img=12" },
+      { tempId: 2,  q: "Tady nikdo nehraje hru na ‚wellness'. Prostě se jde, sní se a mlčí.",                                 by: "Klára V., Olomouc — Hvozdy 2025",            img: "https://i.pravatar.cc/150?img=49" },
+      { tempId: 3,  q: "Vltava v sedm ráno, mlha nad vodou, kafe v plecháčku. Vydalo to za pět dovolených u moře.",           by: "Daniel B., Bratislava — Proudy 2025",        img: "https://i.pravatar.cc/150?img=33" },
+      { tempId: 4,  q: "Nic se nehraje, není to performance — je to skutečné. To je dnes vzácnost.",                          by: "Lucie N., Praha — Hřebeny 2024",             img: "https://i.pravatar.cc/150?img=23" },
+      { tempId: 5,  q: "Po dvou dnech jsem zapomněl, jaký je den v týdnu. Stálo to za to.",                                   by: "Tomáš H., Plzeň — Hřebeny 2025",             img: "https://i.pravatar.cc/150?img=15" },
+      { tempId: 6,  q: "Lidi v partě byli skvělí. Nikdo se nepředváděl. Jen jsme šli a koukali se kolem.",                    by: "Eva P., Liberec — Hvozdy 2024",              img: "https://i.pravatar.cc/150?img=45" },
+      { tempId: 7,  q: "Tělo mě bolelo, hlava ne. Po roce v openspace to byl rozdíl jako noc a den.",                         by: "Martin S., Ostrava — Proudy 2024",           img: "https://i.pravatar.cc/150?img=11" },
+      { tempId: 8,  q: "Bivak v sedle, hvězdy nad hlavou, oheň pod kotlíkem. Jako bych byl zase dítě.",                       by: "Veronika L., Hradec Králové — Hřebeny 2025", img: "https://i.pravatar.cc/150?img=26" },
+      { tempId: 9,  q: "Žádné aplikace, žádné notifikace. Jen mapa, hůl a ticho.",                                            by: "Adam Č., Zlín — Hvozdy 2025",                img: "https://i.pravatar.cc/150?img=8"  },
+      { tempId: 10, q: "Po pěti dnech na řece jsem se vrátil bez potřeby si pustit cokoliv. Zvláštní pocit.",                 by: "Pavel R., Č. Budějovice — Proudy 2025",      img: "https://i.pravatar.cc/150?img=14" },
+      { tempId: 11, q: "Tohle není výlet, tohle je restart. Doporučuji každému, kdo má pocit, že hoří.",                      by: "Hana Š., Praha — Hřebeny 2024",              img: "https://i.pravatar.cc/150?img=24" }
+    ];
+
+    let list = TESTIMONIALS.map(t => ({ ...t }));
+    const nodeMap = new Map();
+    let cardSize = window.matchMedia("(min-width: 640px)").matches ? 365 : 290;
+
+    function positionFor(index, length) {
+      return length % 2
+        ? index - (length + 1) / 2
+        : index - length / 2;
+    }
+
+    function applyTransform(node, position) {
+      const isCenter = position === 0;
+      const tx = (cardSize / 1.5) * position;
+      const ty = isCenter ? -65 : (Math.abs(position) % 2 === 1 ? 15 : -15);
+      const rot = isCenter ? 0 : (Math.abs(position) % 2 === 1 ? 2.5 : -2.5);
+      node.style.width  = cardSize + 'px';
+      node.style.height = cardSize + 'px';
+      node.style.transform = `translate(-50%, -50%) translateX(${tx}px) translateY(${ty}px) rotate(${rot}deg)`;
+      node.classList.toggle('stagger__card--active', isCenter);
+      node.dataset.pos = String(position);
+    }
+
+    function escapeHtml(s) {
+      return s.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+    }
+
+    function createCard(item) {
+      const card = document.createElement('div');
+      card.className = 'stagger__card';
+      card.innerHTML = `
+        <span class="stagger__diag" aria-hidden="true"></span>
+        <img class="stagger__img" src="${item.img}" alt="${escapeHtml(item.by.split(',')[0])}" loading="lazy" />
+        <h3 class="stagger__quote">"${escapeHtml(item.q)}"</h3>
+        <p class="stagger__by">— ${escapeHtml(item.by)}</p>
+      `;
+      card.addEventListener('click', () => {
+        const pos = parseFloat(card.dataset.pos || '0');
+        if (pos !== 0) move(pos);
+      });
+      return card;
+    }
+
+    function render(skipTransitionForNew) {
+      const presentIds = new Set();
+      const newNodes = [];
+
+      list.forEach((item, index) => {
+        presentIds.add(item.tempId);
+        let node = nodeMap.get(item.tempId);
+        const isNew = !node;
+        if (isNew) {
+          node = createCard(item);
+          node.style.transition = 'none';
+          nodeMap.set(item.tempId, node);
+          stack.insertBefore(node, nav);
+          newNodes.push(node);
+        }
+        const position = positionFor(index, list.length);
+        applyTransform(node, position);
+      });
+
+      // re-enable transition for new nodes after 2 frames (so the "snap" position takes effect first)
+      if (newNodes.length) {
+        requestAnimationFrame(() => requestAnimationFrame(() => {
+          newNodes.forEach(n => { n.style.transition = ''; });
+        }));
+      }
+
+      // remove orphans (cards that wrapped to new tempIds)
+      for (const [id, node] of nodeMap) {
+        if (!presentIds.has(id)) {
+          node.remove();
+          nodeMap.delete(id);
+        }
+      }
+    }
+
+    function move(steps) {
+      const newList = [...list];
+      if (steps > 0) {
+        for (let i = steps; i > 0; i--) {
+          const item = newList.shift();
+          if (!item) return;
+          newList.push({ ...item, tempId: 'r-' + Math.random() });
+        }
+      } else if (steps < 0) {
+        for (let i = steps; i < 0; i++) {
+          const item = newList.pop();
+          if (!item) return;
+          newList.unshift({ ...item, tempId: 'r-' + Math.random() });
+        }
+      } else {
+        return;
+      }
+      list = newList;
+      render();
+    }
+
+    prevBtn.addEventListener('click', () => move(-1));
+    nextBtn.addEventListener('click', () => move(1));
+
+    // resize: re-apply with new cardSize
+    let resizeTimer;
+    window.addEventListener('resize', () => {
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(() => {
+        const newSize = window.matchMedia("(min-width: 640px)").matches ? 365 : 290;
+        if (newSize === cardSize) return;
+        cardSize = newSize;
+        list.forEach((item, index) => {
+          const node = nodeMap.get(item.tempId);
+          if (node) applyTransform(node, positionFor(index, list.length));
+        });
+      }, 120);
+    });
+
+    // keyboard nav when section is in view
+    document.addEventListener('keydown', (e) => {
+      const rect = stack.getBoundingClientRect();
+      const inView = rect.top < window.innerHeight * 0.75 && rect.bottom > window.innerHeight * 0.25;
+      if (!inView) return;
+      if (e.key === 'ArrowRight') move(1);
+      if (e.key === 'ArrowLeft')  move(-1);
+    });
+
+    render();
+  })();
+</script>
+
+</body>
+</html>
