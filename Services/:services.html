@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>@blazek.design — UI/UX & Graphic Designer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  /* PP Pangram Sans & PP Valve — add @font-face when you have the files */
+  /* Fallbacks: system geometric sans for body, system display for headings */
+
+  *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+  html,body{width:100%;height:100%;overflow:hidden;background:#fff;font-family:'PP Pangram Sans','DM Sans','Helvetica Neue',Arial,sans-serif;font-weight:600;color:#fff;-webkit-font-smoothing:antialiased}
+
+  .viewport{position:fixed;inset:0;overflow:hidden;z-index:1}
+  .board{position:absolute;width:2240px;height:1700px;background-color:#2552A7;will-change:transform}
+  .board::before{content:'';position:absolute;inset:0;background-image:radial-gradient(circle,rgba(255,255,255,0.12) 1px,transparent 1px);background-size:20px 20px;pointer-events:none;z-index:0}
+  .board>*{position:absolute;z-index:1}
+
+  /* TOP NAV */
+  .top-nav{position:fixed;top:0;left:0;right:0;height:56px;z-index:100;display:flex;align-items:flex-start;justify-content:space-between;padding:20px;pointer-events:none}
+  .top-nav>*{pointer-events:auto;mix-blend-mode:difference;color:#fff}
+  .top-nav__left{font-size:16px;line-height:16px;letter-spacing:-0.32px;text-transform:uppercase}
+  .top-nav__center{position:absolute;left:50%;transform:translateX(-50%);top:20px;display:flex;align-items:center;gap:40px}
+  .top-nav__clock-wrap{display:flex;align-items:center;gap:8px;mix-blend-mode:difference}
+  .top-nav__clock-wrap span{font-family:'IBM Plex Mono',monospace;font-weight:400;font-size:16px;line-height:16px;letter-spacing:-0.32px}
+  .top-nav__dot{width:8px;height:8px;border-radius:50%;background:#4ade80;flex-shrink:0}
+  .top-nav__location{font-family:'IBM Plex Mono',monospace;font-weight:400;font-size:16px;line-height:16px;letter-spacing:-0.32px;mix-blend-mode:difference}
+  .top-nav__right{font-size:16px;line-height:16px;letter-spacing:-0.32px;text-transform:uppercase;mix-blend-mode:difference}
+
+  /* BOTTOM NAV */
+  .bottom-nav{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);z-index:100;display:flex;padding:4px;border-radius:82px;background:rgba(255,255,255,0.12);backdrop-filter:blur(40px);-webkit-backdrop-filter:blur(40px);border:1px solid rgba(255,255,255,0.15)}
+  .bottom-nav__item{height:52px;padding:0 28px;border-radius:82px;display:flex;align-items:center;justify-content:center;font-size:16px;line-height:16px;letter-spacing:-0.32px;color:#fff;cursor:pointer;transition:background .3s;user-select:none;white-space:nowrap}
+  .bottom-nav__item:hover,.bottom-nav__item.active{background:rgba(255,255,255,0.12)}
+
+  /* GLASS — 12% opacity on blue */
+  .glass{background:rgba(255,255,255,0.12);backdrop-filter:blur(40px);-webkit-backdrop-filter:blur(40px);border:1px solid rgba(255,255,255,0.15)}
+
+  /* CARD PAIR — 16px radius */
+  .card-pair{width:356px;height:504px;cursor:pointer;z-index:2}
+  .card-back,.card-front{position:absolute;width:356px;height:504px;border-radius:16px;overflow:hidden;transition:transform .6s cubic-bezier(.22,1,.36,1);left:0;top:0}
+  .card-back{transform:rotate(-15deg);z-index:1}
+  .card-front{transform:rotate(0deg);z-index:2}
+  .card-pair:hover .card-front{transform:rotate(-3deg) scale(1.1)}
+  .card-pair:hover .card-back{transform:rotate(3deg) scale(1.1)}
+
+  .img-wrap{position:relative;overflow:hidden;border-radius:inherit;width:100%;height:100%}
+  .img-wrap img.crop{position:absolute;max-width:none;display:block}
+  .img-wrap img.cover{width:100%;height:100%;object-fit:cover;display:block}
+
+  /* MEDIUM — 16px/12px radius */
+  .card-medium{width:240px;height:300px;border-radius:16px;padding:8px;transition:transform .6s cubic-bezier(.22,1,.36,1);cursor:pointer;overflow:hidden}
+  .card-medium:hover{transform:scale(1.1)}
+  .card-medium__inner{width:224px;height:284px;border-radius:12px;overflow:hidden;position:relative}
+  .card-medium__inner img{width:100%;height:100%;object-fit:cover;display:block}
+
+  /* SMALL — 16px/12px radius */
+  .card-small{width:128px;height:160px;border-radius:16px;padding:8px;transition:transform .6s cubic-bezier(.22,1,.36,1);cursor:pointer;overflow:hidden}
+  .card-small:hover{transform:scale(1.1)}
+  .card-small__inner{width:112px;height:144px;border-radius:12px;overflow:hidden;position:relative}
+  .card-small__inner img.cover{width:100%;height:100%;object-fit:cover;display:block}
+  .card-small__inner img.crop{position:absolute;max-width:none;display:block}
+
+  /* INFO CARD — 16px */
+  .info-card{width:240px;height:300px;border-radius:16px;padding:28px 24px;display:flex;flex-direction:column;align-items:center;overflow:hidden;transition:transform .6s cubic-bezier(.22,1,.36,1)}
+  .info-card:hover{transform:scale(1.1)}
+  .info-card__title{font-family:'PP Valve','Suisse Intl','Helvetica Neue',Arial,sans-serif;font-size:28px;font-weight:500;letter-spacing:-0.308px;text-align:center;text-transform:uppercase;color:#fff;line-height:1;width:151px}
+  .info-card__thumb{width:78px;height:100px;border-radius:20px;overflow:hidden;position:relative;margin-top:auto;margin-bottom:auto}
+  .info-card__thumb img{width:100%;height:100%;object-fit:cover;display:block;border-radius:20px}
+  .info-card__counter{font-size:16px;line-height:16px;letter-spacing:-0.32px;color:#fff;text-transform:uppercase;text-align:center}
+
+  /* BIO CARD — 16px */
+  .about-card{width:240px;height:300px;border-radius:16px;padding:28px 24px;position:relative;overflow:hidden;transition:transform .6s cubic-bezier(.22,1,.36,1)}
+  .about-card:hover{transform:scale(1.1)}
+  .about-card__title{font-family:'PP Valve','Suisse Intl','Helvetica Neue',Arial,sans-serif;font-size:28px;font-weight:500;letter-spacing:-0.308px;color:#fff;text-transform:uppercase;line-height:1}
+  .about-card__text{position:absolute;bottom:28px;left:27px;right:27px;font-size:11px;line-height:16px;letter-spacing:-0.22px;color:#fff}
+
+  /* LABELS */
+  .card-label{font-size:16px;line-height:16px;letter-spacing:-0.32px;text-transform:uppercase;color:#fff;transform:translateX(-50%);white-space:nowrap;user-select:none;pointer-events:none}
+
+  /* CONTACT BUTTON */
+  .contact-btn{padding:4px;border-radius:82px;display:inline-flex;align-items:center;cursor:pointer;transition:transform .6s cubic-bezier(.22,1,.36,1);overflow:hidden;text-decoration:none;color:#fff}
+  .contact-btn:hover{transform:scale(1.1);color:#fff}
+  .contact-btn__inner{height:52px;padding:0 28px;border-radius:82px;display:flex;align-items:center;font-size:16px;line-height:16px;letter-spacing:-0.32px;white-space:nowrap}
+
+  /* MODAL */
+  .case-modal{position:fixed;inset:0;z-index:200;pointer-events:none}
+  .case-modal.open{pointer-events:auto}
+  .case-modal-fade{position:fixed;inset:0;background:rgba(37,82,167,0.4);backdrop-filter:blur(200px);-webkit-backdrop-filter:blur(200px);opacity:0;transition:opacity .6s;z-index:200}
+  .case-modal.open .case-modal-fade{opacity:1}
+  .case-modal-close{position:fixed;right:20px;top:20px;z-index:220;background:none;border:none;color:#fff;font-family:'PP Pangram Sans','DM Sans',sans-serif;font-weight:600;font-size:16px;line-height:16px;letter-spacing:-0.32px;text-transform:uppercase;cursor:pointer;opacity:0;transition:opacity .3s ease .3s;padding:0}
+  .case-modal.open .case-modal-close{opacity:1}
+  .case-modal-close:hover{opacity:.7}
+  .case-modal-scroll{position:fixed;inset:0;z-index:210;display:flex;flex-direction:column;align-items:center;overflow-y:auto;padding:56px 0 60px;gap:10px;scrollbar-width:none}
+  .case-modal-scroll::-webkit-scrollbar{display:none}
+  .case-modal-info{width:738px;display:flex;align-items:baseline;gap:24px;opacity:0;transform:translateY(20px);transition:opacity .5s ease .1s,transform .5s ease .1s;padding-bottom:10px;flex-shrink:0}
+  .case-modal.open .case-modal-info{opacity:1;transform:translateY(0)}
+  .case-modal-name,.case-modal-year{font-size:16px;line-height:16px;letter-spacing:-0.32px;text-transform:uppercase}
+  .case-modal-img{width:738px;min-height:1045px;border-radius:64px;overflow:hidden;flex-shrink:0;opacity:0;transform:scale(.5) translateY(100px);transition:opacity .6s,transform .6s cubic-bezier(.22,1,.36,1)}
+  .case-modal.open .case-modal-img{opacity:1;transform:scale(1) translateY(0)}
+  .case-modal.open .case-modal-img:nth-of-type(1){transition-delay:0s}
+  .case-modal.open .case-modal-img:nth-of-type(2){transition-delay:.08s}
+  .case-modal.open .case-modal-img:nth-of-type(3){transition-delay:.16s}
+  .case-modal-img img{width:100%;height:100%;object-fit:cover;display:block}
+  @media(max-width:800px){.case-modal-info{width:calc(100vw - 40px)}.case-modal-img{width:calc(100vw - 40px);min-height:unset;aspect-ratio:738/1045}}
+  .board,.card-pair,.card-medium,.card-small,.info-card,.about-card,.contact-btn{user-select:none;-webkit-user-select:none}
+</style>
+</head>
+<body>
+
+<!-- MODAL -->
+<div class="case-modal" id="caseModal">
+  <div class="case-modal-fade" id="caseFade"></div>
+  <button class="case-modal-close" id="caseClose">close</button>
+  <div class="case-modal-scroll" id="caseScroll">
+    <div class="case-modal-info">
+      <span class="case-modal-name" id="caseName"></span>
+      <span class="case-modal-year">&copy;2026</span>
+    </div>
+  </div>
+</div>
+
+<!-- TOP NAV -->
+<nav class="top-nav">
+  <div class="top-nav__left">@blazek.design</div>
+  <div class="top-nav__center">
+    <div class="top-nav__clock-wrap">
+      <div class="top-nav__dot"></div>
+      <span id="clock">23:27 GMT</span>
+    </div>
+    <span class="top-nav__location">[Prague, CZ]</span>
+  </div>
+  <div class="top-nav__right">&copy;2026</div>
+</nav>
+
+<!-- BOTTOM NAV -->
+<nav class="bottom-nav">
+  <div class="bottom-nav__item active" data-nav="home">Home</div>
+  <div class="bottom-nav__item" data-nav="works">Works</div>
+  <div class="bottom-nav__item" data-nav="about">About</div>
+  <div class="bottom-nav__item" data-nav="contact">Contact</div>
+</nav>
+
+<!-- VIEWPORT -->
+<div class="viewport" id="viewport">
+  <div class="board" id="board">
+
+    <!-- LLUMO pair — board(242.16, 169.48) -->
+    <div class="card-pair" style="left:242.16px;top:169.48px"
+         data-case="Llumo"
+         data-images="https://www.figma.com/api/mcp/asset/72f50021-d388-469b-97dd-a347a6246885,https://www.figma.com/api/mcp/asset/256a793f-92e9-47e6-a5e2-8364feb01379,https://www.figma.com/api/mcp/asset/72f50021-d388-469b-97dd-a347a6246885">
+      <div class="card-back"><div class="img-wrap">
+        <img class="crop" src="https://www.figma.com/api/mcp/asset/256a793f-92e9-47e6-a5e2-8364feb01379" alt="" style="width:141.57%;height:100%;left:-19.5%;top:0.04%">
+        <img src="https://www.figma.com/api/mcp/asset/469e2ac1-cb2b-4170-a72d-40e1edb14ce7" alt="" style="position:absolute;width:199%;height:159.5%;left:-49.5%;top:-22.9%;object-fit:cover;max-width:none">
+      </div></div>
+      <div class="card-front"><div class="img-wrap">
+        <img class="cover" src="https://www.figma.com/api/mcp/asset/72f50021-d388-469b-97dd-a347a6246885" alt="">
+      </div></div>
+    </div>
+    <div class="card-label" style="left:420.16px;top:713.48px">Llumo</div>
+
+    <!-- ME pair — board(1179, 557) -->
+    <div class="card-pair" style="left:1179px;top:557px"
+         data-case="Me"
+         data-images="https://www.figma.com/api/mcp/asset/4aad9549-8037-45b6-b850-f39f977efb61,https://www.figma.com/api/mcp/asset/cafa7de8-6ebc-4473-9d01-1cbb01868d72,https://www.figma.com/api/mcp/asset/4aad9549-8037-45b6-b850-f39f977efb61">
+      <div class="card-back"><div class="img-wrap">
+        <img class="cover" src="https://www.figma.com/api/mcp/asset/cafa7de8-6ebc-4473-9d01-1cbb01868d72" alt="">
+      </div></div>
+      <div class="card-front"><div class="img-wrap">
+        <img class="cover" src="https://www.figma.com/api/mcp/asset/4aad9549-8037-45b6-b850-f39f977efb61" alt="">
+      </div></div>
+    </div>
+    <div class="card-label" style="left:1357.5px;top:1101px">Me</div>
+
+    <!-- SVIŠŤ pair — board(1766.16, 1098.48) -->
+    <div class="card-pair" style="left:1766.16px;top:1098.48px"
+         data-case="Svišť"
+         data-images="https://www.figma.com/api/mcp/asset/e642c64c-3e9e-4d45-bc9d-402d6d7a47a5,https://www.figma.com/api/mcp/asset/0379b113-e330-43e2-b35d-286cbdaf6869,https://www.figma.com/api/mcp/asset/e642c64c-3e9e-4d45-bc9d-402d6d7a47a5">
+      <div class="card-back"><div class="img-wrap">
+        <img class="crop" src="https://www.figma.com/api/mcp/asset/0379b113-e330-43e2-b35d-286cbdaf6869" alt="" style="width:279.14%;height:197.17%;left:-156.45%;top:-7.07%">
+      </div></div>
+      <div class="card-front"><div class="img-wrap">
+        <img class="crop" src="https://www.figma.com/api/mcp/asset/e642c64c-3e9e-4d45-bc9d-402d6d7a47a5" alt="" style="width:149.01%;height:105.25%;left:-45.02%;top:-1.88%">
+      </div></div>
+    </div>
+    <div class="card-label" style="left:1944.66px;top:1642.48px">Svišť</div>
+
+    <!-- INFO CARD -->
+    <div class="info-card glass" style="left:736px;top:693px">
+      <div class="info-card__title">UI/UX &amp;<br>graphic</div>
+      <div class="info-card__thumb">
+        <img src="https://www.figma.com/api/mcp/asset/65c25f92-5a0d-49c0-adbd-0e375e16b8ab" alt="Designer">
+      </div>
+      <div class="info-card__counter">designer</div>
+    </div>
+
+    <!-- BIO CARD -->
+    <div class="about-card glass" style="left:1700px;top:525px">
+      <div class="about-card__title">Bio</div>
+      <div class="about-card__text">Pomůžu ti vydělávat jako grafický &amp; UI/UX designer. Art director @socialmind.cz. Mými kurzy prošlo 2400 studentů.</div>
+    </div>
+
+    <!-- MEDIUM top-right -->
+    <div class="card-medium glass" style="left:1906px;top:46px">
+      <div class="card-medium__inner">
+        <img src="https://www.figma.com/api/mcp/asset/13fdb1d5-866d-49a4-ba3d-db09e6dc1f11" alt="" style="width:100%;height:100%;object-fit:cover;display:block">
+      </div>
+    </div>
+
+    <!-- MEDIUM bottom -->
+    <div class="card-medium glass" style="left:625px;top:1390px">
+      <div class="card-medium__inner">
+        <img src="https://www.figma.com/api/mcp/asset/c308e343-9391-452f-bf3c-422b1914565d" alt="" style="width:100%;height:100%;object-fit:cover;display:block">
+      </div>
+    </div>
+
+    <!-- SMALL 1 — (109, 1315) -->
+    <div class="card-small glass" style="left:109px;top:1315px">
+      <div class="card-small__inner"><img class="cover" src="https://www.figma.com/api/mcp/asset/03fde13f-a39a-454b-b3eb-ecff12285d98" alt=""></div>
+    </div>
+    <!-- SMALL 2 — (1023, 132) -->
+    <div class="card-small glass" style="left:1023px;top:132px">
+      <div class="card-small__inner"><img class="cover" src="https://www.figma.com/api/mcp/asset/16ac1b87-64a8-4ce9-b3ec-a21693f8aad3" alt=""></div>
+    </div>
+    <!-- SMALL 3 — (1191, 204) -->
+    <div class="card-small glass" style="left:1191px;top:204px">
+      <div class="card-small__inner"><img class="crop" src="https://www.figma.com/api/mcp/asset/16ac1b87-64a8-4ce9-b3ec-a21693f8aad3" alt="" style="width:552.38%;height:241.67%;left:-194.42%;top:-79.31%"></div>
+    </div>
+    <!-- SMALL 4 — (1264, 98) -->
+    <div class="card-small glass" style="left:1264px;top:98px">
+      <div class="card-small__inner"><img class="crop" src="https://www.figma.com/api/mcp/asset/16ac1b87-64a8-4ce9-b3ec-a21693f8aad3" alt="" style="width:530.45%;height:232.07%;left:-248.42%;top:-4.37%"></div>
+    </div>
+    <!-- SMALL 5 — (320, 1095) -->
+    <div class="card-small glass" style="left:320px;top:1095px">
+      <div class="card-small__inner"><img class="crop" src="https://www.figma.com/api/mcp/asset/6defe91b-ecf9-4022-821c-46fcf34547f7" alt="" style="width:259.29%;height:143.06%;left:-79.64%;top:-18.51%"></div>
+    </div>
+    <!-- SMALL 6 — (488, 1167) -->
+    <div class="card-small glass" style="left:488px;top:1167px">
+      <div class="card-small__inner"><img class="crop" src="https://www.figma.com/api/mcp/asset/6defe91b-ecf9-4022-821c-46fcf34547f7" alt="" style="width:370.54%;height:204.43%;left:-150%;top:-88.39%"></div>
+    </div>
+    <!-- SMALL 7 — (561, 1061) -->
+    <div class="card-small glass" style="left:561px;top:1061px">
+      <div class="card-small__inner"><img class="crop" src="https://www.figma.com/api/mcp/asset/6defe91b-ecf9-4022-821c-46fcf34547f7" alt="" style="width:393.05%;height:216.85%;left:-226.79%;top:-24.36%"></div>
+    </div>
+
+    <!-- CONTACT -->
+    <a class="contact-btn glass" style="left:1282px;top:1484px" href="https://www.instagram.com/blazek.design/" target="_blank" rel="noopener">
+      <div class="contact-btn__inner">Contact</div>
+    </a>
+
+  </div>
+</div>
+
+<script>
+(function(){
+  'use strict';
+  var cl=document.getElementById('clock');
+  function tick(){var d=new Date();cl.textContent=String(d.getUTCHours()).padStart(2,'0')+':'+String(d.getUTCMinutes()).padStart(2,'0')+' GMT'}
+  tick();setInterval(tick,1e3);
+
+  var vp=document.getElementById('viewport'),bd=document.getElementById('board');
+  var BW=2240,BH=1700,E=.08,cx=-400,cy=-400,tx=cx,ty=cy,mo=false;
+  function cl2(v,a,b){return Math.max(a,Math.min(b,v))}
+  function st(x,y){tx=cl2(x,innerWidth-BW,0);ty=cl2(y,innerHeight-BH,0)}
+  (function r(){cx+=(tx-cx)*E;cy+=(ty-cy)*E;bd.style.transform='translate('+cx.toFixed(2)+'px,'+cy.toFixed(2)+'px)';requestAnimationFrame(r)})();
+
+  vp.addEventListener('wheel',function(e){if(mo)return;e.preventDefault();st(tx-e.deltaX,ty-e.deltaY)},{passive:false});
+  var dr=false,lx=0,ly=0;
+  vp.addEventListener('pointerdown',function(e){if(mo||e.target.closest('.card-pair,.bottom-nav,.contact-btn'))return;dr=true;lx=e.clientX;ly=e.clientY;vp.style.cursor='grabbing'});
+  addEventListener('pointermove',function(e){if(!dr)return;st(tx+(e.clientX-lx),ty+(e.clientY-ly));lx=e.clientX;ly=e.clientY});
+  addEventListener('pointerup',function(){dr=false;vp.style.cursor=''});
+
+  document.querySelectorAll('.bottom-nav__item').forEach(function(n){n.addEventListener('click',function(){
+    document.querySelectorAll('.bottom-nav__item').forEach(function(i){i.classList.remove('active')});
+    n.classList.add('active');var t=n.dataset.nav;
+    if(t==='home')st(-400,-400);if(t==='works')st(-900,-400);if(t==='about')st(-1200,-300);if(t==='contact')st(-900,-1100);
+  })});
+
+  var md=document.getElementById('caseModal'),fd=document.getElementById('caseFade'),cb=document.getElementById('caseClose'),sc=document.getElementById('caseScroll'),nm=document.getElementById('caseName');
+  function op(n,imgs){nm.textContent=n;sc.querySelectorAll('.case-modal-img').forEach(function(e){e.remove()});
+    imgs.split(',').forEach(function(s){var d=document.createElement('div');d.className='case-modal-img';var i=document.createElement('img');i.src=s.trim();i.alt=n;d.appendChild(i);sc.appendChild(d)});
+    sc.scrollTop=0;void md.offsetHeight;md.classList.add('open');mo=true}
+  function sh(){md.classList.remove('open');mo=false}
+  document.querySelectorAll('.card-pair').forEach(function(p){p.addEventListener('click',function(){op(p.dataset.case,p.dataset.images)})});
+  cb.addEventListener('click',sh);fd.addEventListener('click',sh);
+  addEventListener('keydown',function(e){if(e.key==='Escape'&&mo)sh()});
+})();
+</script>
+</body>
+</html>
